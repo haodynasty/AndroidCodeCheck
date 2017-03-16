@@ -1,0 +1,166 @@
+apply plugin: 'checkstyle'
+apply plugin: 'findbugs'
+apply plugin: 'pmd'
+
+/*
+ * Copyright 2015 Vincent Brison.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+// Add checkstyle, findbugs, pmd and lint to the check task.
+check.dependsOn 'checkstyle', 'findbugs', 'pmd', 'lint'
+
+def configDir = "${project.rootDir}/config/quality"
+def reportsDir = "${project.buildDir}/reports"
+
+//download file
+def streamToFile(String fileUrl, String fileName) {
+    //check file is exist
+    def configPath = "${project.buildDir}/reports/config/";
+    def path = new File(configPath)
+    def file = new File(configPath+fileName)
+    if (file.exists()){
+        println 'config exists, file path :'+file.getAbsolutePath()
+        return file.getAbsolutePath()
+    }else {
+        if (!path.exists()) {
+            println 'create config dirs '+configPath
+            path.mkdirs()
+        }
+        file.createNewFile()
+    }
+
+    //download file and save to local
+    println '.....download config file '+file.getAbsolutePath()
+    def input = new URL(fileUrl).openStream()
+    Scanner s = new Scanner(input)
+    StringBuilder builder = new StringBuilder()
+    while (s.hasNextLine()) {
+        builder.append(s.nextLine() +"\n")
+    }
+    def outputStream = new FileOutputStream(file)
+    try {
+        outputStream.write(builder.toString().bytes)
+        outputStream.flush()
+        return file.getAbsolutePath()
+    }catch (Exception e){
+        e.printStackTrace()
+        println '.....fail to get config from '+fileUrl
+    }finally {
+        try {
+            outputStream.close()
+        } catch (Exception e) {
+            e.printStackTrace()
+        }
+    }
+    return null
+}
+
+def checkstyleFile = streamToFile('https://raw.githubusercontent.com/haodynasty/AndroidCodeCheck/master/checkstyle/checkstyle.xml', 'checkstyle.xml')
+def suppressionsFile = streamToFile("https://raw.githubusercontent.com/haodynasty/AndroidCodeCheck/master/checkstyle/suppressions.xml", 'suppressions.xml')
+def findbugsFilter = streamToFile('https://raw.githubusercontent.com/haodynasty/AndroidCodeCheck/master/findbugs/findbugs-filter.xml', 'findbugs-filter.xml')
+def pmdFile = streamToFile("https://raw.githubusercontent.com/haodynasty/AndroidCodeCheck/master/pmd/pmd-ruleset.xml", 'pmd-ruleset.xml')
+def lintFile = streamToFile("https://raw.githubusercontent.com/haodynasty/AndroidCodeCheck/master/lint/lint.xml", 'lint.xml')
+
+task checkstyle(type: Checkstyle) {
+    description '...............Runs CheckStyle...............'
+    configFile file(checkstyleFile)
+    configProperties.checkstyleSuppressionsPath = file(suppressionsFile).absolutePath
+    ignoreFailures = false
+    showViolations = true
+    source 'src'
+    include '**/*.java'
+    exclude '**/gen/**'
+    classpath = files()
+}
+
+task findbugs(type: FindBugs, dependsOn: "assembleDebug") {
+    description '...............Runs FindBugs...............'
+    ignoreFailures = false
+    effort = "max"
+    reportLevel = "high"
+    excludeFilter = new File(findbugsFilter)
+    classes = files("${project.rootDir}/app/build/intermediates/classes")
+
+    source 'src'
+    include '**/*.java'
+    exclude '**/gen/**'
+
+    reports {
+        xml.enabled = false
+        html.enabled = true
+        xml {
+            destination "$reportsDir/findbugs/findbugs.xml"
+        }
+        html {
+            destination "$reportsDir/findbugs/findbugs.html"
+        }
+    }
+
+    classpath = files()
+}
+
+task pmd(type: Pmd) {
+    description '...............Runs PMD...............'
+    ignoreFailures = false
+    ruleSetFiles = files(pmdFile)
+    ruleSets = []
+
+    source 'src'
+    include '**/*.java'
+    exclude '**/gen/**'
+
+    reports {
+        xml.enabled = false
+        html.enabled = true
+        xml {
+            destination "$reportsDir/pmd/pmd.xml"
+        }
+        html {
+            destination "$reportsDir/pmd/pmd.html"
+        }
+    }
+}
+
+android {
+    lintOptions {
+        abortOnError true
+        xmlReport false
+        htmlReport true
+        lintConfig file(lintFile)
+        htmlOutput file("$reportsDir/lint/lint-result.html")
+        xmlOutput file("$reportsDir/lint/lint-result.xml")
+    }
+}
+
+task detectInfer(type: Exec) {
+    commandLine 'command'
+    args = ['-v', 'infer']
+
+    // Hide output if infer is present
+    standardOutput new ByteArrayOutputStream()
+
+    // Inform user if infer not present
+    ignoreExitValue true
+    doLast {
+        if(execResult.getExitValue() != 0) {
+            throw new GradleException("Infer seems not installed. Please refer to http://fbinfer.com/docs/getting-started.html")
+        }
+    }
+}
+
+task infer(type: Exec, dependsOn: [clean, detectInfer]) {
+    workingDir "${project.rootDir}"
+    commandLine 'infer'
+    args = ['--', './gradlew', 'build']
+}
