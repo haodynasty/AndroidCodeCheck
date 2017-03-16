@@ -1,5 +1,22 @@
 # AndroidCodeCheck
-check code by checkstyle, findbugs,pmd
+check code by checkstyle, findbugs, pmd and lint
+
+# How to use
+1. add plugin to app.gradle file
+```
+apply plugin: 'com.android.application'
+apply from: 'https://raw.githubusercontent.com/haodynasty/AndroidCodeCheck/master/quality.gradle'
+...
+```
+2. check code by command
+```
+gradlew check
+```
+
+3. check report
+you can check report from checkstyle, findbugs, pmd and lint.
+
+report file path: app/build/reports
 
 # demo
 
