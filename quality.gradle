@@ -54,6 +54,8 @@ def streamToFile(String fileUrl, String fileName) {
         outputStream.flush()
         if (!file.exists()){
             println '.....fail to write config file to local path:'+file.getAbsolutePath()
+        }else {
+            println '.....success to write config file to local path:'+file.getAbsolutePath()
         }
         return file.getAbsolutePath()
     }catch (Exception e){
