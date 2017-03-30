@@ -52,10 +52,13 @@ def streamToFile(String fileUrl, String fileName) {
     try {
         outputStream.write(builder.toString().bytes)
         outputStream.flush()
+        if (!file.exists()){
+            println '.....fail to write config file to local path:'+file.getAbsolutePath()
+        }
         return file.getAbsolutePath()
     }catch (Exception e){
         e.printStackTrace()
-        println '.....fail to get config from '+fileUrl
+        println '.....fail to get config from '+fileUrl+" error:"+e.getMessage()
     }finally {
         try {
             outputStream.close()
@@ -63,6 +66,7 @@ def streamToFile(String fileUrl, String fileName) {
             e.printStackTrace()
         }
     }
+    println '.....fail to get config from '+fileUrl
     return null
 }
 
