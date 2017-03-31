@@ -170,7 +170,7 @@ task infer(type: Exec, dependsOn: [clean, detectInfer]) {
   args = ['--', './gradlew', 'build']
 }
 
-clean.doFirst {
-  delete "${project.rootDir}/config/";
-  println '.....clean all config'
-}
+//clean.doFirst {
+//  delete "${project.rootDir}/config/";
+//  println '.....clean all config'
+//}
