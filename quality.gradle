@@ -20,56 +20,55 @@ apply plugin: 'pmd'
 // Add checkstyle, findbugs, pmd and lint to the check task.
 check.dependsOn 'checkstyle', 'findbugs', 'pmd', 'lint'
 
-def configDir = "${project.rootDir}/config/quality"
 def reportsDir = "${project.buildDir}/reports"
 
 //download file
 def streamToFile(String fileUrl, String fileName) {
-    //check file is exist
-    def configPath = "${project.buildDir}/reports/config/";
-    def path = new File(configPath)
-    def file = new File(configPath+fileName)
-    if (file.exists()){
-        println 'config exists, file path :'+file.getAbsolutePath()
-        return file.getAbsolutePath()
-    }else {
-        if (!path.exists()) {
-            println 'create config dirs '+configPath
-            path.mkdirs()
-        }
-        file.createNewFile()
+  //check file is exist
+  def configDir = "${project.rootDir}/config/";
+  def path = new File(configDir)
+  def file = new File(configDir+fileName)
+  if (file.exists()){
+    println 'config exists, file path :'+file.getAbsolutePath()
+    return file.getAbsolutePath()
+  }else {
+    if (!path.exists()) {
+      println 'create config dirs '+configDir
+      path.mkdirs()
     }
+    file.createNewFile()
+  }
 
-    //download file and save to local
-    println '.....download config file '+file.getAbsolutePath()
-    def input = new URL(fileUrl).openStream()
-    Scanner s = new Scanner(input)
-    StringBuilder builder = new StringBuilder()
-    while (s.hasNextLine()) {
-        builder.append(s.nextLine() +"\n")
+  //download file and save to local
+  println '.....download config file '+file.getAbsolutePath()
+  def input = new URL(fileUrl).openStream()
+  Scanner s = new Scanner(input)
+  StringBuilder builder = new StringBuilder()
+  while (s.hasNextLine()) {
+    builder.append(s.nextLine() +"\n")
+  }
+  def outputStream = new FileOutputStream(file)
+  try {
+    outputStream.write(builder.toString().bytes)
+    outputStream.flush()
+    if (!file.exists()){
+      println '.....fail to write config file to local path:'+file.getAbsolutePath()
+    }else {
+      println '.....success to write config file to local path:'+file.getAbsolutePath()
     }
-    def outputStream = new FileOutputStream(file)
+    return file.getAbsolutePath()
+  }catch (Exception e){
+    e.printStackTrace()
+    println '.....fail to get config from '+fileUrl+" error:"+e.getMessage()
+  }finally {
     try {
-        outputStream.write(builder.toString().bytes)
-        outputStream.flush()
-        if (!file.exists()){
-            println '.....fail to write config file to local path:'+file.getAbsolutePath()
-        }else {
-            println '.....success to write config file to local path:'+file.getAbsolutePath()
-        }
-        return file.getAbsolutePath()
-    }catch (Exception e){
-        e.printStackTrace()
-        println '.....fail to get config from '+fileUrl+" error:"+e.getMessage()
-    }finally {
-        try {
-            outputStream.close()
-        } catch (Exception e) {
-            e.printStackTrace()
-        }
+      outputStream.close()
+    } catch (Exception e) {
+      e.printStackTrace()
     }
-    println '.....fail to get config from '+fileUrl
-    return null
+  }
+  println '.....fail to get config from '+fileUrl
+  return null
 }
 
 def checkstyleFile = streamToFile('https://raw.githubusercontent.com/haodynasty/AndroidCodeCheck/master/checkstyle/checkstyle.xml', 'checkstyle.xml')
@@ -79,94 +78,99 @@ def pmdFile = streamToFile("https://raw.githubusercontent.com/haodynasty/Android
 def lintFile = streamToFile("https://raw.githubusercontent.com/haodynasty/AndroidCodeCheck/master/lint/lint.xml", 'lint.xml')
 
 task checkstyle(type: Checkstyle) {
-    description '...............Runs CheckStyle...............'
-    configFile file(checkstyleFile)
-    configProperties.checkstyleSuppressionsPath = file(suppressionsFile).absolutePath
-    ignoreFailures = false
-    showViolations = true
-    source 'src'
-    include '**/*.java'
-    exclude '**/gen/**'
-    classpath = files()
+  description '...............Runs CheckStyle...............'
+  configFile file(checkstyleFile)
+  configProperties.checkstyleSuppressionsPath = file(suppressionsFile).absolutePath
+  ignoreFailures = false
+  showViolations = true
+  source 'src'
+  include '**/*.java'
+  exclude '**/gen/**'
+  classpath = files()
 }
 
 task findbugs(type: FindBugs, dependsOn: "assembleDebug") {
-    description '...............Runs FindBugs...............'
-    ignoreFailures = false
-    effort = "max"
-    reportLevel = "high"
-    excludeFilter = new File(findbugsFilter)
-    classes = files("${project.rootDir}/app/build/intermediates/classes")
+  description '...............Runs FindBugs...............'
+  ignoreFailures = false
+  effort = "max"
+  reportLevel = "high"
+  excludeFilter = new File(findbugsFilter)
+  classes = files("${project.rootDir}/app/build/intermediates/classes")
 
-    source 'src'
-    include '**/*.java'
-    exclude '**/gen/**'
+  source 'src'
+  include '**/*.java'
+  exclude '**/gen/**'
 
-    reports {
-        xml.enabled = false
-        html.enabled = true
-        xml {
-            destination "$reportsDir/findbugs/findbugs.xml"
-        }
-        html {
-            destination "$reportsDir/findbugs/findbugs.html"
-        }
+  reports {
+    xml.enabled = false
+    html.enabled = true
+    xml {
+      destination "$reportsDir/findbugs/findbugs.xml"
     }
+    html {
+      destination "$reportsDir/findbugs/findbugs.html"
+    }
+  }
 
-    classpath = files()
+  classpath = files()
 }
 
 task pmd(type: Pmd) {
-    description '...............Runs PMD...............'
-    ignoreFailures = false
-    ruleSetFiles = files(pmdFile)
-    ruleSets = []
+  description '...............Runs PMD...............'
+  ignoreFailures = false
+  ruleSetFiles = files(pmdFile)
+  ruleSets = []
 
-    source 'src'
-    include '**/*.java'
-    exclude '**/gen/**'
+  source 'src'
+  include '**/*.java'
+  exclude '**/gen/**'
 
-    reports {
-        xml.enabled = false
-        html.enabled = true
-        xml {
-            destination "$reportsDir/pmd/pmd.xml"
-        }
-        html {
-            destination "$reportsDir/pmd/pmd.html"
-        }
+  reports {
+    xml.enabled = false
+    html.enabled = true
+    xml {
+      destination "$reportsDir/pmd/pmd.xml"
     }
+    html {
+      destination "$reportsDir/pmd/pmd.html"
+    }
+  }
 }
 
 android {
-    lintOptions {
-        abortOnError true
-        xmlReport false
-        htmlReport true
-        lintConfig file(lintFile)
-        htmlOutput file("$reportsDir/lint/lint-result.html")
-        xmlOutput file("$reportsDir/lint/lint-result.xml")
-    }
+  lintOptions {
+    abortOnError true
+    xmlReport false
+    htmlReport true
+    lintConfig file(lintFile)
+    htmlOutput file("$reportsDir/lint/lint-result.html")
+    xmlOutput file("$reportsDir/lint/lint-result.xml")
+  }
 }
 
 task detectInfer(type: Exec) {
-    commandLine 'command'
-    args = ['-v', 'infer']
+  commandLine 'command'
+  args = ['-v', 'infer']
 
-    // Hide output if infer is present
-    standardOutput new ByteArrayOutputStream()
+  // Hide output if infer is present
+  standardOutput new ByteArrayOutputStream()
 
-    // Inform user if infer not present
-    ignoreExitValue true
-    doLast {
-        if(execResult.getExitValue() != 0) {
-            throw new GradleException("Infer seems not installed. Please refer to http://fbinfer.com/docs/getting-started.html")
-        }
+  // Inform user if infer not present
+  ignoreExitValue true
+  doLast {
+    if(execResult.getExitValue() != 0) {
+      throw new GradleException("Infer seems not installed. Please refer to http://fbinfer.com/docs/getting-started.html")
     }
+  }
 }
 
 task infer(type: Exec, dependsOn: [clean, detectInfer]) {
-    workingDir "${project.rootDir}"
-    commandLine 'infer'
-    args = ['--', './gradlew', 'build']
+  workingDir "${project.rootDir}"
+  commandLine 'infer'
+  args = ['--', './gradlew', 'build']
+}
+
+clean.doFirst {
+  delete "${project.rootDir}/config/";
+  println '.....clean all config'
 }
