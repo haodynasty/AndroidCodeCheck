@@ -17,9 +17,6 @@ apply plugin: 'pmd'
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-// Add checkstyle, findbugs, pmd and lint to the check task.
-check.dependsOn 'checkstyle', 'findbugs', 'pmd', 'lint'
-
 def reportsDir = "${project.buildDir}/reports"
 
 //download file
@@ -71,18 +68,25 @@ def streamToFile(String fileUrl, String fileName) {
   return null
 }
 
-def checkstyleFile = streamToFile('https://raw.githubusercontent.com/haodynasty/AndroidCodeCheck/master/checkstyle/checkstyle.xml', 'checkstyle.xml')
-def suppressionsFile = streamToFile("https://raw.githubusercontent.com/haodynasty/AndroidCodeCheck/master/checkstyle/suppressions.xml", 'suppressions.xml')
-def findbugsFilter = streamToFile('https://raw.githubusercontent.com/haodynasty/AndroidCodeCheck/master/findbugs/findbugs-filter.xml', 'findbugs-filter.xml')
-def pmdFile = streamToFile("https://raw.githubusercontent.com/haodynasty/AndroidCodeCheck/master/pmd/pmd-ruleset.xml", 'pmd-ruleset.xml')
-def lintFile = streamToFile("https://raw.githubusercontent.com/haodynasty/AndroidCodeCheck/master/lint/lint.xml", 'lint.xml')
+ext {
+  checkstyleUrl = "https://raw.githubusercontent.com/haodynasty/AndroidCodeCheck/master/checkstyle/checkstyle.xml"
+  suppressionsUrl = "https://raw.githubusercontent.com/haodynasty/AndroidCodeCheck/master/checkstyle/suppressions.xml"
+  findbugsUrl = "https://raw.githubusercontent.com/haodynasty/AndroidCodeCheck/master/findbugs/findbugs-filter.xml"
+  pmdUrl = "https://raw.githubusercontent.com/haodynasty/AndroidCodeCheck/master/pmd/pmd-ruleset.xml"
+  lintUrl = "https://raw.githubusercontent.com/haodynasty/AndroidCodeCheck/master/lint/lint.xml"
+  checkstyleFile = streamToFile(checkstyleUrl, "checkstyle.xml")
+  suppressionsFile = streamToFile(suppressionsUrl, "suppressions.xml")
+  findbugsFilter = streamToFile(findbugsUrl, "findbugs-filter.xml")
+  pmdFile = streamToFile(pmdUrl, "pmd-ruleset.xml")
+  lintFile = streamToFile(lintUrl, "lint.xml")
+}
 
 task checkstyle(type: Checkstyle) {
   description '...............Runs CheckStyle...............'
   configFile file(checkstyleFile)
   configProperties.checkstyleSuppressionsPath = file(suppressionsFile).absolutePath
   ignoreFailures = false
-  showViolations = true
+  showViolations = false
   source 'src'
   include '**/*.java'
   exclude '**/gen/**'
@@ -170,7 +174,19 @@ task infer(type: Exec, dependsOn: [clean, detectInfer]) {
   args = ['--', './gradlew', 'build']
 }
 
-//clean.doFirst {
-//  delete "${project.rootDir}/config/";
-//  println '.....clean all config'
-//}
+preBuild.doFirst {
+  println '.....check config file.....'
+  streamToFile(checkstyleUrl, "checkstyle.xml")
+  streamToFile(suppressionsUrl, "suppressions.xml")
+  streamToFile(findbugsUrl, "findbugs-filter.xml")
+  streamToFile(pmdUrl, "pmd-ruleset.xml")
+  streamToFile(lintUrl, "lint.xml")
+}
+
+clean.doFirst {
+  delete "${project.rootDir}/config/";
+  println '.....clean all config'
+}
+
+// Add checkstyle, findbugs, pmd and lint to the check task.
+check.dependsOn 'checkstyle', 'findbugs', 'pmd', 'lint'
