@@ -28,5 +28,9 @@
     <suppress checks="[a-zA-Z0-9]*" files=".*_.*Factory.java" />
     <suppress checks="[a-zA-Z0-9]*" files=".*ViewInjector.java" />
     <suppress checks="[a-zA-Z0-9]*" files=".*_MembersInjector.java" />
-
+    <!--bean or entity-->
+    <suppress checks="[a-zA-Z0-9]*" files=".*Entity.java" />
+    <suppress checks="[a-zA-Z0-9]*" files=".*Bean.java" />
+    <suppress checks="[a-zA-Z0-9]*" files=".*Event.java" />
+    <suppress checks="[a-zA-Z0-9]*" files="HttpResult.java" />
 </suppressions>
