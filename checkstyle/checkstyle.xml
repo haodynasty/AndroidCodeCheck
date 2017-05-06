@@ -21,8 +21,9 @@
 
 
 <module name="Checker">
+	  <property name="charset" value="UTF-8"/>
     <module name="FileLength">
-        <property name="max" value="500"/>
+        <property name="max" value="1500"/>
         <property name="fileExtensions" value=""/>
     </module>
 
@@ -53,7 +54,7 @@
         <!-- Checks for long methods and constructors. !-->
         <!-- See http://checkstyle.sf.net/config_sizes.html !-->
         <module name="MethodLength">
-            <property name="max" value="80"/>
+            <property name="max" value="100"/>
             <property name="countEmpty" value="true"/>
             <property name="tokens" value="METHOD_DEF, CTOR_DEF"/>
         </module>
@@ -67,7 +68,7 @@
         <!-- Checks the number of parameters of a method or constructor. !-->
         <!-- See http://checkstyle.sf.net/config_sizes.html !-->
         <module name="ParameterNumber">
-            <property name="max" value="7"/>
+            <property name="max" value="10"/>
             <property name="tokens" value="METHOD_DEF, CTOR_DEF"/>
         </module>
 
@@ -119,7 +120,8 @@
         <!-- See http://checkstyle.sf.net/config_whitespace.html !-->
         <module name="OperatorWrap">
             <property name="option" value="nl"/>
-            <property name="tokens" value="ASSIGN, BAND, BOR, BSR, BXOR, COLON, DIV,
+            <!--去除了ASSIGN等号空格后换行的检查，因为实际情况可以在等号后换行-->
+            <property name="tokens" value="BAND, BOR, BSR, BXOR, COLON, DIV,
                                            EQUAL, GE, GT, LAND, LE, LITERAL_INSTANCEOF,
                                            LOR, LT, MINUS, MOD, NOT_EQUAL,
                                            PLUS, QUESTION, SL, SR, STAR"/>
@@ -247,7 +249,7 @@
         <!-- Checks for static variable name naming conventions. !-->
         <!-- See http://checkstyle.sf.net/config_naming.html !-->
         <module name="StaticVariableName">
-            <property name="format" value="^[a-z][a-zA-Z0-9]*$"/>
+            <property name="format" value="^s[A-Z][a-zA-Z0-9]*$"/>
             <property name="applyToPublic" value="true"/>
             <property name="applyToProtected" value="true"/>
             <property name="applyToPackage" value="true"/>
@@ -306,10 +308,11 @@
             !-->
             <property name="allowUndeclaredRTE" value="false"/>
             <property name="allowThrowsTagsForSubclasses" value="false"/>
-            <property name="allowMissingParamTags" value="false"/>
+            <property name="allowMissingParamTags" value="true"/>
             <property name="allowMissingThrowsTags" value="false"/>
-            <property name="allowMissingReturnTag" value="false"/>
-            <property name="allowMissingJavadoc" value="false"/>
+            <property name="allowMissingReturnTag" value="true"/>
+            <!--允许方法没有javadoc-->
+            <property name="allowMissingJavadoc" value="true"/>
             <property name="allowMissingPropertyJavadoc" value="true"/>
             <property name="logLoadErrors" value="true"/>
             <property name="suppressLoadErrors" value="false"/>
@@ -439,7 +442,7 @@
         <!-- See http://checkstyle.sourceforge.net/config_coding.html#ModifiedControlVariable !-->
         <module name="ModifiedControlVariable"/>
 
-        <!-- Disallow assignment of parameters. !-->
+        <!-- Disallow assignment of parameters. 不允许改变参数 !-->
         <!-- See http://checkstyle.sf.net/config_coding.html !-->
         <module name="ParameterAssignment"/>
 
@@ -447,8 +450,5 @@
         <!-- Checks for unused import statements. !-->
         <!-- See http://checkstyle.sf.net/config_import.html !-->
         <module name="UnusedImports"/>
-
     </module>
-
-
 </module>
