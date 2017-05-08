@@ -183,6 +183,19 @@ preBuild.doFirst {
   streamToFile(lintUrl, "lint.xml")
 }
 
+project.afterEvaluate {
+  tasks.getByName("checkstyle") {
+    it.doFirst {
+      println '.....check config file before checkstyle.....'
+      streamToFile(checkstyleUrl, "checkstyle.xml")
+      streamToFile(suppressionsUrl, "suppressions.xml")
+      streamToFile(findbugsUrl, "findbugs-filter.xml")
+      streamToFile(pmdUrl, "pmd-ruleset.xml")
+      streamToFile(lintUrl, "lint.xml")
+    }
+  }
+}
+
 clean.doFirst {
   delete "${project.rootDir}/config/";
   println '.....clean all config'
