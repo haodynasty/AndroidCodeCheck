@@ -120,7 +120,7 @@
         <!-- See http://checkstyle.sf.net/config_whitespace.html !-->
         <module name="OperatorWrap">
             <property name="option" value="nl"/>
-            <!--去除了ASSIGN等号空格后换行的检查，因为实际情况可以在等号后换行-->
+            <!--去除了ASSIGN等号空格后换行的check,因为实际情况可以在等号后换行-->
             <property name="tokens" value="BAND, BOR, BSR, BXOR, COLON, DIV,
                                            EQUAL, GE, GT, LAND, LE, LITERAL_INSTANCEOF,
                                            LOR, LT, MINUS, MOD, NOT_EQUAL,
@@ -442,7 +442,7 @@
         <!-- See http://checkstyle.sourceforge.net/config_coding.html#ModifiedControlVariable !-->
         <module name="ModifiedControlVariable"/>
 
-        <!-- Disallow assignment of parameters. 不允许改变参数 !-->
+        <!-- Disallow assignment of parameters. 不允许改变参数!-->
         <!-- See http://checkstyle.sf.net/config_coding.html !-->
         <module name="ParameterAssignment"/>
 
