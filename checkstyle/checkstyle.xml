@@ -442,7 +442,7 @@
         <!-- See http://checkstyle.sourceforge.net/config_coding.html#ModifiedControlVariable !-->
         <module name="ModifiedControlVariable"/>
 
-        <!-- Disallow assignment of parameters. 不允许改变参数!-->
+        <!-- Disallow assignment of parameters-->
         <!-- See http://checkstyle.sf.net/config_coding.html !-->
         <module name="ParameterAssignment"/>
 
